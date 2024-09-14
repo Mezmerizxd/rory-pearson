@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": true,
+    "jsx": "react",
+    "types": ["@types/node", "@types/react", "@types/react-dom", "vite/client"],
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "@lib/*": ["../lib/*"],
+      "@components/*": ["./src/components/*"],
+      "*.jpg": ["./public/images/*"]
+    }
+  },
+  "include": ["./src/**/*", "./src/types.d.ts", "../types.d.ts", "../**/src/types.d.ts"],
+  "exclude": ["node_modules", "build"]
+}

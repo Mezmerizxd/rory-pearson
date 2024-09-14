@@ -1,0 +1,20 @@
+logs/
+*.log
+config.json
+backup/
+.env
+
+# Logs
+logs/
+*.log
+
+# Configs
+.env
+config.json
+
+# Ui Build
+ui/build/
+
+# Other
+local/
+ui/node_modules/**/*
