@@ -16,13 +16,6 @@ else
     echo "[)(] Found Yarn"
 fi
 
-# Check if .env exists
-if [ ! -f .env ]; then
-    echo "Cannot find .env file"
-else
-    echo "[)(] Found .env"
-fi
-
 # Install UI dependencies in the ui folder
 cd ui
 echo "[)(] Installing UI dependencies"
