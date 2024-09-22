@@ -31,8 +31,23 @@ COPY --from=ui-build /app/ui/build /app/ui/build
 # Build the Go app (assuming there's a Go module in place)
 RUN go build -o /app/server ./cmd/main
 
+# Final stage: Use Python as the base image
+FROM python:3.12.5
+
+# Set working directory
+WORKDIR /app
+
+# Copy the Go binary from the go-build stage
+COPY --from=go-build /app/server /app/server
+
+# Copy the UI build files (if needed at runtime by your Go app)
+COPY --from=go-build /app/ui/build /app/ui/build
+
 # Expose the port the Go app will run on
 EXPOSE 3000
+
+# Install any Python dependencies (if needed)
+# RUN pip install -r requirements.txt  # Uncomment if you have Python dependencies
 
 # Run the Go app
 CMD ["/app/server"]
