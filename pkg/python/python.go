@@ -2,6 +2,7 @@ package python
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
 	"rory-pearson/pkg/log"
 	"strings"
@@ -20,20 +21,23 @@ var (
 var instance *Python
 
 type Config struct {
-	Log      log.Log
-	Librarys []string
+	Log         log.Log
+	StoragePath string
+	Librarys    []string
 }
 
 type Python struct {
 	Log           log.Log
+	StoragePath   string
 	Librarys      []string
 	IsInitialized bool
 }
 
 func Initialize(c Config) (*Python, error) {
 	var python = &Python{
-		Log:      c.Log,
-		Librarys: c.Librarys,
+		Log:         c.Log,
+		StoragePath: c.StoragePath,
+		Librarys:    c.Librarys,
 	}
 
 	// Get librarys
@@ -65,7 +69,7 @@ func GetInstance() (*Python, error) {
 
 func (p *Python) Destroy() {
 	// Delete the virtual environment
-	cmd := exec.Command("rm", "-rf", PythonVirtualEnvDirectory)
+	cmd := exec.Command("rm", "-rf", fmt.Sprintf("%s/%s", p.StoragePath, PythonVirtualEnvDirectory))
 	cmd.Run()
 
 	p.Log.Info().Msg("Python instance destroyed")
@@ -75,13 +79,13 @@ func (p *Python) Command(arg ...string) (*exec.Cmd, error) {
 	p.Log.Info().Msg("Creating command")
 
 	// Check if environment is ready
-	cmd := exec.Command("ls", PythonVirtualEnvDirectory)
+	cmd := exec.Command("ls", fmt.Sprintf("%s/%s", p.StoragePath, PythonVirtualEnvDirectory))
 	err := cmd.Run()
 	if err != nil {
 		p.Log.Info().Msg("Creating virtual environment")
 
 		// Create the virtual environment if it doesn't exist
-		cmd := exec.Command("python3", "-m", "venv", PythonVirtualEnvDirectory)
+		cmd := exec.Command("python3", "-m", "venv", fmt.Sprintf("%s/%s", p.StoragePath, PythonVirtualEnvDirectory))
 		err := cmd.Run()
 		if err != nil {
 			return nil, ErrorCreatingVirtualEnvironment
@@ -92,7 +96,7 @@ func (p *Python) Command(arg ...string) (*exec.Cmd, error) {
 	commandStr := strings.Join(arg, " ")
 
 	// Use bash to source the virtual environment and run the command
-	mainCmd := exec.Command("bash", "-c", "source "+PythonVirtualEnvActivateScript+" && "+commandStr)
+	mainCmd := exec.Command("bash", "-c", "source "+fmt.Sprintf("%s/%s", p.StoragePath, PythonVirtualEnvActivateScript)+" && "+commandStr)
 
 	mainCmd.Stdout = NewLoggerWriter(LoggerWriter{
 		Log:  p.Log,

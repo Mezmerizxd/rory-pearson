@@ -21,6 +21,7 @@ type Config struct {
 	ID            string `json:"id"`            // The name of the id being logged.
 	ConsoleOutput bool   `json:"consoleOutput"` // Flag to enable/disable console output.
 	FileOutput    bool   `json:"fileOutput"`    // Flag to enable/disable file output.
+	StoragePath   string `json:"storagePath"`   // The path to store the log files.
 }
 
 // Log interface defines the methods available for logging.
@@ -53,8 +54,8 @@ func New(cfg Config) Log {
 	// Check if file output is enabled.
 	if cfg.FileOutput {
 		// Ensure the logs directory exists.
-		if _, err := os.Stat(logsDirectory); os.IsNotExist(err) {
-			if err := os.Mkdir(logsDirectory, logsFileMode); err != nil {
+		if _, err := os.Stat(cfg.StoragePath + logsDirectory); os.IsNotExist(err) {
+			if err := os.Mkdir(cfg.StoragePath+logsDirectory, logsFileMode); err != nil {
 				print("Error creating logs directory")
 				panic(err)
 			}
@@ -62,7 +63,7 @@ func New(cfg Config) Log {
 
 		// Open or create the log file.
 		var err error
-		file, err = os.OpenFile(logsDirectory+cfg.ID+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, logsFileMode)
+		file, err = os.OpenFile(cfg.StoragePath+logsDirectory+cfg.ID+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, logsFileMode)
 		if err != nil {
 			print("Error opening log file")
 			panic(err)

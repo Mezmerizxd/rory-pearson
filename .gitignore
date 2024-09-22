@@ -19,3 +19,5 @@ ui/build/
 local/
 ui/node_modules/**/*
 venv/
+temp/
+storage/

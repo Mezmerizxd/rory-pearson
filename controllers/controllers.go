@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"rory-pearson/internal/controllers/background_remover_controllers"
-	"rory-pearson/internal/controllers/board_controllers"
-	"rory-pearson/internal/controllers/image_convert_controllers"
+	"rory-pearson/controllers/background_remover_controllers"
+	"rory-pearson/controllers/board_controllers"
+	"rory-pearson/controllers/image_convert_controllers"
 	"rory-pearson/pkg/server"
 	"rory-pearson/pkg/util"
 

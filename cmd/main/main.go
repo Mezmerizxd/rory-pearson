@@ -1,26 +1,22 @@
 package main
 
 import (
-	"os"
+	"rory-pearson/controllers"
 	"rory-pearson/environment"
+	"rory-pearson/internal/background_remover"
 	"rory-pearson/internal/board"
-	"rory-pearson/internal/controllers"
 	"rory-pearson/pkg/log"
 	"rory-pearson/pkg/python"
 	"rory-pearson/pkg/server"
 )
 
 func main() {
-	err := initDirectoryStructure()
-	if err != nil {
-		panic(err)
-	}
-
 	// Log
 	l := log.New(log.Config{
 		ID:            "main",
 		ConsoleOutput: true,
 		FileOutput:    false,
+		StoragePath:   environment.RootDirectory,
 	})
 	defer l.Close()
 
@@ -43,12 +39,15 @@ func main() {
 	// Python
 	pyLog := log.New(log.Config{
 		ID:            "python",
-		ConsoleOutput: true,
+		ConsoleOutput: false,
 		FileOutput:    true,
+		StoragePath:   environment.RootDirectory,
 	})
 	defer pyLog.Close()
+
 	_, err = python.Initialize(python.Config{
-		Log: pyLog,
+		Log:         pyLog,
+		StoragePath: environment.CreateStorageDirectory("python"),
 		Librarys: []string{
 			"backgroundremover",
 		},
@@ -57,6 +56,18 @@ func main() {
 		l.Error().Err(err).Msg("Failed to initialize python")
 		return
 	}
+
+	// Background remover
+	bgLog := log.New(log.Config{
+		ID:            "background_remover",
+		ConsoleOutput: true,
+		FileOutput:    true,
+		StoragePath:   environment.RootDirectory,
+	})
+	_, err = background_remover.Initialize(background_remover.Config{
+		Log:         bgLog,
+		StoragePath: environment.CreateStorageDirectory("background_remover"),
+	})
 
 	// Server
 	svr, err := server.New(server.Config{
@@ -80,19 +91,4 @@ func main() {
 		l.Error().Err(err).Msg("Failed to start server")
 		return
 	}
-}
-
-var directorys = []string{"temp"}
-
-func initDirectoryStructure() error {
-	for _, directory := range directorys {
-		if _, err := os.Stat(directory); os.IsNotExist(err) {
-			err := os.Mkdir(directory, 0755)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }

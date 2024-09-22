@@ -5,22 +5,14 @@ import (
 	"image"
 	"os"
 	"path/filepath"
+	"rory-pearson/environment"
 	"rory-pearson/pkg/util"
 
 	ico "github.com/Kodeworks/golang-image-ico"
 	"golang.org/x/image/draw"
 )
 
-const storageDirectory = "image_convert_storage/"
-
-// SupportedImageType represents the type of image supported
-type SupportedImageType int
-
-const (
-	PNG SupportedImageType = iota
-	JPEG
-	WEBP
-)
+var storageDirectory = environment.CreateStorageDirectory("image_convert_storage")
 
 var Sizes = []image.Point{
 	{16, 16},
@@ -32,17 +24,17 @@ var Sizes = []image.Point{
 	{256, 256},
 }
 
+// Convert converts the image into multiple icon sizes and compresses them into a zip file.
 func Convert(imagePath string) (string, error) {
-	// Generate a unique UUID for the directory
 	outputDir := util.GenerateUUIDv4()
 	dirPath := filepath.Join(storageDirectory, outputDir)
 
-	// Create the output directory
+	// Create the directory for storing converted icons
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
 		return "", fmt.Errorf("could not create output directory: %v", err)
 	}
 
-	// Open and decode the image
+	// Open and decode the image file
 	imageFile, err := os.Open(imagePath)
 	if err != nil {
 		return "", fmt.Errorf("could not open image file: %v", err)
@@ -54,7 +46,7 @@ func Convert(imagePath string) (string, error) {
 		return "", fmt.Errorf("could not decode image: %v", err)
 	}
 
-	// Process and save each resized image
+	// Resize and save the icons
 	for _, size := range Sizes {
 		resizedImg := resizeImage(img, size)
 		rgbaImg := convertToRGBA(resizedImg)
@@ -72,7 +64,7 @@ func Convert(imagePath string) (string, error) {
 		icoFile.Close()
 	}
 
-	// Compress the directory and clean up
+	// Compress the directory into a zip file and remove the icons folder
 	zipName := outputDir + ".zip"
 	if err := util.CompressDirectoryAndDelete(dirPath, storageDirectory, zipName); err != nil {
 		return "", fmt.Errorf("could not compress directory: %v", err)
@@ -81,29 +73,36 @@ func Convert(imagePath string) (string, error) {
 	return zipName, nil
 }
 
-func GetConvertedZipPath(zipName string, delete bool) (string, error) {
+// GetConvertedZipPath returns the path to the converted zip file and optionally deletes it.
+func GetConvertedZipPath(zipName string) (string, error) {
+	// Ensure the zipName ends with .zip
+	if filepath.Ext(zipName) != ".zip" {
+		zipName += ".zip"
+	}
+
 	zipPath := filepath.Join(storageDirectory, zipName)
 	if _, err := os.Stat(zipPath); os.IsNotExist(err) {
 		return "", fmt.Errorf("file does not exist: %v", err)
 	}
 
-	if delete {
-		if err := os.Remove(zipPath); err != nil {
-			return "", fmt.Errorf("could not delete file: %v", err)
-		}
-	}
-
 	return zipPath, nil
 }
 
-// convertToRGBA converts the image to RGBA format
+func DeleteConvertedZip(zipName string) error {
+	if err := os.Remove(filepath.Join(storageDirectory, zipName)); err != nil {
+		return fmt.Errorf("could not delete zip file: %v", err)
+	}
+
+	return nil
+}
+
+// Utility functions for image conversion and resizing
 func convertToRGBA(img image.Image) *image.RGBA {
 	rgba := image.NewRGBA(img.Bounds())
 	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
 	return rgba
 }
 
-// resizeImage resizes the image to the specified size
 func resizeImage(img image.Image, size image.Point) image.Image {
 	resizedImg := image.NewRGBA(image.Rect(0, 0, size.X, size.Y))
 	draw.NearestNeighbor.Scale(resizedImg, resizedImg.Bounds(), img, img.Bounds(), draw.Src, nil)

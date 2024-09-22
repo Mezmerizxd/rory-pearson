@@ -37,6 +37,8 @@ func Initialize(cfg Config) error {
 
 	// GenerateRandomPosts(100)
 
+	instance.Log.Info().Msg("Board initialized")
+
 	return nil
 }
 
