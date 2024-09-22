@@ -1,72 +1,25 @@
 package controllers
 
 import (
-	"rory-pearson/internal/board"
+	"rory-pearson/internal/controllers/background_remover_controllers"
+	"rory-pearson/internal/controllers/board_controllers"
+	"rory-pearson/internal/controllers/image_convert_controllers"
 	"rory-pearson/pkg/server"
 	"rory-pearson/pkg/util"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Initialize(server *server.Server) {
+	board_controllers.Initialize(server)
+	image_convert_controllers.Initialize(server)
+	background_remover_controllers.Initialize(server)
+
 	server.Engine.GET("/ping", func(c *gin.Context) {
 		info, err := util.GetSystemInfo()
 		c.JSON(200, gin.H{
 			"message": info,
 			"error":   err,
-		})
-	})
-
-	server.Engine.GET("/board/get", func(c *gin.Context) {
-		// Get query parameters with default values
-		page, err := strconv.Atoi(c.DefaultQuery("page", "1")) // Default to page 1
-		if err != nil {
-			c.JSON(400, gin.H{
-				"error": "Invalid page parameter",
-			})
-			return
-		}
-
-		pageSize, err := strconv.Atoi(c.DefaultQuery("pageSize", strconv.Itoa(board.DefaultPageSize))) // Default to the board's DefaultPageSize
-		if err != nil {
-			c.JSON(400, gin.H{
-				"error": "Invalid pageSize parameter",
-			})
-			return
-		}
-
-		posts, err := board.GetPosts(page, pageSize)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		c.JSON(200, posts)
-	})
-
-	server.Engine.POST("/board/create", func(c *gin.Context) {
-		var body board.CreateBoardPost
-		err := c.BindJSON(&body)
-		if err != nil {
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		err = board.CreatePost(body)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		c.JSON(200, gin.H{
-			"message": "Post created",
 		})
 	})
 }

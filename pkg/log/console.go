@@ -11,6 +11,6 @@ func NewConsoleWriter() *ConsoleWriter {
 func (w *ConsoleWriter) Write(p []byte) (n int, err error) {
 	message := GetWriterOutputFormat(string(p))
 
-	fmt.Printf("[%s] [%s] [%s]: %s\n", message.Time, message.Level, message.ID, message.Message)
+	fmt.Printf("[%s] [%s]: %s\n", message.Level, message.ID, message.Message)
 	return len(p), nil
 }

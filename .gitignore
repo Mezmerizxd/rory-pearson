@@ -18,3 +18,4 @@ ui/build/
 # Other
 local/
 ui/node_modules/**/*
+venv/
