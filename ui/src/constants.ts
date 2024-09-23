@@ -10,6 +10,10 @@ export const navigation_items = [
     name: "Board",
     to: "/board",
   },
+  {
+    name: "Background Remover",
+    to: "/background-remover",
+  },
   // {
   //   name: "Components",
   //   to: "/components",

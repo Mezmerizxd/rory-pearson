@@ -8,6 +8,10 @@ const { Components } = lazyImport(
   "Components"
 );
 const { Board } = lazyImport(() => import("../features/home"), "Board");
+const { BackgroundRemover } = lazyImport(
+  () => import("../features/home"),
+  "BackgroundRemover"
+);
 
 export const AppRoutes = () => {
   const commonRoutes = [
@@ -19,6 +23,10 @@ export const AppRoutes = () => {
     {
       path: "/board",
       element: <Board />,
+    },
+    {
+      path: "/background-remover",
+      element: <BackgroundRemover />,
     },
   ];
 
