@@ -12,6 +12,10 @@ const { BackgroundRemover } = lazyImport(
   () => import("../features/home"),
   "BackgroundRemover"
 );
+const { ImageToIcon } = lazyImport(
+  () => import("../features/home"),
+  "ImageToIcon"
+);
 
 export const AppRoutes = () => {
   const commonRoutes = [
@@ -27,6 +31,10 @@ export const AppRoutes = () => {
     {
       path: "/background-remover",
       element: <BackgroundRemover />,
+    },
+    {
+      path: "/image-to-icon",
+      element: <ImageToIcon />,
     },
   ];
 

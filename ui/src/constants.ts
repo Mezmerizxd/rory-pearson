@@ -14,6 +14,10 @@ export const navigation_items = [
     name: "Background Remover",
     to: "/background-remover",
   },
+  {
+    name: "Image To Icon",
+    to: "/image-to-icon",
+  },
   // {
   //   name: "Components",
   //   to: "/components",
