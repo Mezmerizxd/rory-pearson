@@ -9,7 +9,7 @@ import (
 )
 
 func Initialize(server *server.Server) {
-	server.Engine.GET("/board/get", func(c *gin.Context) {
+	server.Engine.GET("/api/board/get", func(c *gin.Context) {
 		// Get query parameters with default values
 		page, err := strconv.Atoi(c.DefaultQuery("page", "1")) // Default to page 1
 		if err != nil {
@@ -38,7 +38,7 @@ func Initialize(server *server.Server) {
 		c.JSON(200, posts)
 	})
 
-	server.Engine.POST("/board/create", func(c *gin.Context) {
+	server.Engine.POST("/api/board/create", func(c *gin.Context) {
 		var body board.CreateBoardPost
 		err := c.BindJSON(&body)
 		if err != nil {

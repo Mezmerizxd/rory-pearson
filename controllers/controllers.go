@@ -15,7 +15,7 @@ func Initialize(server *server.Server) {
 	image_convert_controllers.Initialize(server)
 	background_remover_controllers.Initialize(server)
 
-	server.Engine.GET("/ping", func(c *gin.Context) {
+	server.Engine.GET("/api/ping", func(c *gin.Context) {
 		info, err := util.GetSystemInfo()
 		c.JSON(200, gin.H{
 			"message": info,

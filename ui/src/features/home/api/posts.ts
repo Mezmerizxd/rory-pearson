@@ -23,7 +23,7 @@ export const getPosts = async (
 
   try {
     const response = await fetch(
-      `${hostname}/board/get?page=${page}&pageSize=${pageSize}`,
+      `${hostname}/api/board/get?page=${page}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -63,7 +63,7 @@ export const usePosts = ({ config, page, pageSize }: UseGetPostsOptions) => {
 
 export const CreatePost = async (data: CreatePostData) => {
   const hostname = getHostname();
-  const response = await fetch(`${hostname}/board/create`, {
+  await fetch(`${hostname}/api/board/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -11,7 +11,7 @@ import (
 )
 
 func Initialize(server *server.Server) {
-	server.Engine.POST("/image-convert/upload", func(c *gin.Context) {
+	server.Engine.POST("/api/image-convert/upload", func(c *gin.Context) {
 		// Get the uploaded file
 		formFile, err := c.FormFile("file")
 		if err != nil {
@@ -55,7 +55,7 @@ func Initialize(server *server.Server) {
 		})
 	})
 
-	server.Engine.GET("/image-convert/download/:id", func(c *gin.Context) {
+	server.Engine.GET("/api/image-convert/download/:id", func(c *gin.Context) {
 		id := c.Param("id")
 
 		// Get the zip file path based on the provided ID
