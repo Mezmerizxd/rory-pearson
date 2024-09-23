@@ -4,6 +4,7 @@ import { Button, Spinner } from "@components/Elements";
 import { FaDownload, FaUpload } from "react-icons/fa";
 import { FaRotateRight } from "react-icons/fa6";
 import { useBackgroundRemover } from "../api/background-remover";
+import clsx from "clsx";
 
 const HomeLayout = React.lazy(() => import("@components/Layout/HomeLayout"));
 
@@ -60,6 +61,30 @@ export const BackgroundRemover = () => {
     <>
       <HomeLayout title="Background Remover">
         <div className="p-10">
+          <div
+            className={clsx(
+              "flex flex-col items-center justify-center",
+              "space-y-2"
+            )}
+          >
+            <h1
+              className={clsx(
+                "text-3xl font-bold text-t-dark",
+                "flex justify-center align-middle"
+              )}
+            >
+              Background Remover
+            </h1>
+            <p
+              className={clsx(
+                "text-sm text-t-dark",
+                "flex justify-center align-middle"
+              )}
+            >
+              Remove the background from your image
+            </p>
+          </div>
+
           <div className="p-5 flex justify-center align-middle">
             {error && (
               <p className="p-2 bg-orange-500/20 text-orange-500 border border-orange-500/20">
