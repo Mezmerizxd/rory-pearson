@@ -8,6 +8,7 @@ import { ThemeProvider } from "@material-tailwind/react";
 import { queryClient } from "../util/react-query";
 import { Spinner } from "@components/Elements";
 import { Button } from "@components/Elements/Button";
+import { Notifications } from "@components/Notifications";
 
 const ErrorFallback = () => {
   return (
@@ -45,6 +46,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <HelmetProvider>
             <QueryClientProvider client={queryClient}>
+              <Notifications />
               {process.env.NODE_ENV !== "test" && <ReactQueryDevtools />}
               <Router>{children}</Router>
             </QueryClientProvider>

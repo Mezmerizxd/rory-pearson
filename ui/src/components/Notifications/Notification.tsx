@@ -1,17 +1,26 @@
-import React from 'react';
-import { Transition } from '@headlessui/react';
-import { MdClose } from 'react-icons/md';
-import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
-import { FaCircleInfo } from 'react-icons/fa6';
-import { IoIosCloseCircle } from 'react-icons/io';
+import React from "react";
+import { Transition } from "@headlessui/react";
+import { MdClose } from "react-icons/md";
+import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { FaCircleInfo } from "react-icons/fa6";
+import { IoIosCloseCircle } from "react-icons/io";
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from "react";
 
 const icons = {
   info: <FaCircleInfo className="h-6 w-6 text-blue-500" aria-hidden="true" />,
-  success: <FaCheckCircle className="h-6 w-6 text-green-500" aria-hidden="true" />,
-  warning: <FaExclamationCircle className="h-6 w-6 text-yellow-500" aria-hidden="true" />,
-  error: <IoIosCloseCircle className="h-6 w-6 text-red-500" aria-hidden="true" />,
+  success: (
+    <FaCheckCircle className="h-6 w-6 text-green-500" aria-hidden="true" />
+  ),
+  warning: (
+    <FaExclamationCircle
+      className="h-6 w-6 text-yellow-500"
+      aria-hidden="true"
+    />
+  ),
+  error: (
+    <IoIosCloseCircle className="h-6 w-6 text-red-500" aria-hidden="true" />
+  ),
 };
 
 export type NotificationProps = {
@@ -24,7 +33,10 @@ export type NotificationProps = {
   onDismiss: (id: string) => void;
 };
 
-export const Notification = ({ notification: { id, type, title, message }, onDismiss }: NotificationProps) => {
+export const Notification = ({
+  notification: { id, type, title, message },
+  onDismiss,
+}: NotificationProps) => {
   const [remainingTime, setRemainingTime] = useState(4000);
 
   useEffect(() => {
@@ -61,8 +73,8 @@ export const Notification = ({ notification: { id, type, title, message }, onDis
             <div className="flex items-start">
               <div className="flex-shrink-0">{icons[type]}</div>
               <div className="ml-3 w-0 flex-1 pt-0.5">
-                <p className="text-sm font-medium text-t-dark-200">{title}</p>
-                <p className="mt-1 text-sm text-t-dark-200">{message}</p>
+                <p className="text-sm font-medium text-t-dark">{title}</p>
+                <p className="mt-1 text-sm text-t-dark">{message}</p>
               </div>
               <div className="ml-4 flex-shrink-0 flex">
                 <button
@@ -77,7 +89,10 @@ export const Notification = ({ notification: { id, type, title, message }, onDis
               </div>
             </div>
           </div>
-          <div className="bg-accent-light" style={{ width: `${widthPercentage}%`, height: '2px' }} />
+          <div
+            className="bg-accent-light"
+            style={{ width: `${widthPercentage}%`, height: "2px" }}
+          />
         </div>
       </Transition>
     </div>
