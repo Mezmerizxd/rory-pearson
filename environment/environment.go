@@ -13,14 +13,18 @@ import (
 // Environment holds the environment variables required by the application.
 // These are loaded from the .env file during initialization.
 type Environment struct {
-	ServerPort  string `json:"SERVER_PORT"`   // Port for the server to run on
-	UIBuildPath string `json:"UI_BUILD_PATH"` // Path to the UI build files
-	DbUrl       string `json:"DB_URL"`        // Database connection URL
+	ServerPort          string `json:"SERVER_PORT"`           // Port for the server to run on
+	UIBuildPath         string `json:"UI_BUILD_PATH"`         // Path to the UI build files
+	DbUrl               string `json:"DB_URL"`                // Database connection URL
+	SpotifyClientId     string `json:"SPOTIFY_CLIENT_ID"`     // Spotify client ID
+	SpotifyClientSecret string `json:"SPOTIFY_CLIENT_SECRET"` // Spotify client secret
 }
 
 // Initialize loads the environment variables from the .env file and
 // returns a populated Environment struct.
 func Initialize() (*Environment, error) {
+	environment := Environment{}
+
 	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
@@ -43,12 +47,12 @@ func Initialize() (*Environment, error) {
 	}
 
 	// Create a new Environment struct from the map
-	env := Environment{}
-	if err := mapToStruct(envMap, &env); err != nil {
+	if err := mapToStruct(envMap, &environment); err != nil {
 		return nil, fmt.Errorf("failed to map environment values to struct: %v", err)
 	}
 
-	return &env, nil
+	env = &environment
+	return &environment, nil
 }
 
 var env *Environment
