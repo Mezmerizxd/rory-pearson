@@ -23,7 +23,7 @@ func main() {
 	// Environment variables
 	env, err := environment.Initialize()
 	if err != nil {
-		l.Error().Err(err).Msgf("Failed to initialize environment", err.Error())
+		l.Error().Err(err).Msgf("Failed to initialize environment: %s", err.Error())
 		return
 	}
 

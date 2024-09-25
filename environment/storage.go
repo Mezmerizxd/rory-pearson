@@ -5,35 +5,32 @@ import (
 	"os"
 )
 
-const RootDirectory = "storage/"
+const RootDirectory = "storage/" // Base directory for storage operations
 
-/*
-CreateStorageDirectory creates a storage directory under the root directory
-The path parameter could be "test", "/test", "test/", "/test/test2"
-The function should return the full path of the created directory
-*/
+// CreateStorageDirectory creates a directory under the root directory.
+// It normalizes the input path by removing leading/trailing slashes.
+// Returns the full path of the created directory.
 func CreateStorageDirectory(path string) string {
 	// Check if the path is empty
 	if path == "" {
 		panic("path is empty")
 	}
 
-	// Check if the path starts with a slash
+	// Remove leading slash, if any
 	if path[0] == '/' {
 		path = path[1:]
 	}
 
-	// Check if the path ends with a slash
+	// Remove trailing slash, if any
 	if path[len(path)-1] == '/' {
 		path = path[:len(path)-1]
 	}
 
-	// Create the full path
+	// Construct the full directory path
 	fullPath := fmt.Sprintf("%s%s", RootDirectory, path)
 
-	// Check if the directory exists
+	// Create the directory if it does not exist
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-		// Create the directory
 		if err := os.MkdirAll(fullPath, os.ModePerm); err != nil {
 			panic(err)
 		}
@@ -42,6 +39,14 @@ func CreateStorageDirectory(path string) string {
 	return fullPath
 }
 
+// GetRootTempDirectory returns the path to the temporary directory under the root storage directory.
 func GetRootTempDirectory() string {
 	return fmt.Sprintf("%stemp/", RootDirectory)
+}
+
+// DestroyStorage removes the root storage directory and all its contents.
+func DestroyStorage() {
+	if err := os.RemoveAll(RootDirectory); err != nil {
+		panic(err)
+	}
 }

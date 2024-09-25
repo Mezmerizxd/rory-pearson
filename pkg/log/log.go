@@ -53,9 +53,19 @@ func New(cfg Config) Log {
 
 	// Check if file output is enabled.
 	if cfg.FileOutput {
+		// Ensure the storage path exists.
+		if _, err := os.Stat(cfg.StoragePath); os.IsNotExist(err) {
+			// Create the storage path directory if it doesn't exist.
+			if err := os.MkdirAll(cfg.StoragePath, logsFileMode); err != nil {
+				print("Error creating storage directory")
+				panic(err)
+			}
+		}
+
 		// Ensure the logs directory exists.
 		if _, err := os.Stat(cfg.StoragePath + logsDirectory); os.IsNotExist(err) {
-			if err := os.Mkdir(cfg.StoragePath+logsDirectory, logsFileMode); err != nil {
+			// Create the logs directory if it doesn't exist.
+			if err := os.MkdirAll(cfg.StoragePath+logsDirectory, logsFileMode); err != nil {
 				print("Error creating logs directory")
 				panic(err)
 			}
@@ -92,12 +102,7 @@ func New(cfg Config) Log {
 		consoleWriter: consoleWriter,
 	}
 
-	return &log{
-		config:        cfg,
-		writer:        writer,
-		file:          file,
-		consoleWriter: consoleWriter,
-	}
+	return instances[cfg.ID]
 }
 
 func Get(id string) Log {

@@ -10,45 +10,40 @@ import (
 	"github.com/joho/godotenv"
 )
 
-/*
-########################################
-########################################
-#				 ENVIRENMENT VARIABLES				 #
-########################################
-# EDIT THE ENVIRONMENT VARIABLES BELOW #
-########################################
-*/
+// Environment holds the environment variables required by the application.
+// These are loaded from the .env file during initialization.
 type Environment struct {
-	ServerPort  string `json:"SERVER_PORT"`
-	UIBuildPath string `json:"UI_BUILD_PATH"`
-	DbUrl       string `json:"DB_URL"`
+	ServerPort  string `json:"SERVER_PORT"`   // Port for the server to run on
+	UIBuildPath string `json:"UI_BUILD_PATH"` // Path to the UI build files
+	DbUrl       string `json:"DB_URL"`        // Database connection URL
 }
 
+// Initialize loads the environment variables from the .env file and
+// returns a populated Environment struct.
 func Initialize() (*Environment, error) {
+	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Errorf("error loading .env file")
 	}
 
-	// Map Environment keys to a string array
+	// Retrieve the expected environment keys (JSON tags from Environment struct)
 	keys := getExpectedKeys()
 
-	// Get Environment values
+	// Fetch environment values using the keys
 	envValues, err := getEnvValues(keys)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get environment values: %v", err)
 	}
 
-	// Create a map of keys and values
+	// Map environment values into a map[string]interface{}
 	envMap := make(map[string]interface{})
 	for _, envValue := range envValues {
 		envMap[envValue.key] = envValue.value
 	}
 
-	// Create a new Config struct
+	// Create a new Environment struct from the map
 	env := Environment{}
-
-	// Convert the map to a Config struct
 	if err := mapToStruct(envMap, &env); err != nil {
 		return nil, fmt.Errorf("failed to map environment values to struct: %v", err)
 	}
@@ -58,21 +53,26 @@ func Initialize() (*Environment, error) {
 
 var env *Environment
 
+// Get returns the current environment instance. It should be called after Initialize.
 func Get() *Environment {
 	return env
 }
 
+// EnvValues represents a key-value pair of environment variables.
 type EnvValues struct {
-	key   string
-	value string
+	key   string // The environment variable key
+	value string // The corresponding value of the key
 }
 
-func getEnvValues(key []string) ([]EnvValues, error) {
+// getEnvValues retrieves the environment variable values for the given keys.
+// It returns an error if any required environment variable is not set.
+func getEnvValues(keys []string) ([]EnvValues, error) {
 	var envValues []EnvValues
 
-	for _, k := range key {
+	for _, k := range keys {
 		v := os.Getenv(k)
 
+		// If a required environment variable is missing, return an error
 		if v == "" {
 			return nil, fmt.Errorf("environment variable %s is not set", k)
 		}
@@ -83,7 +83,8 @@ func getEnvValues(key []string) ([]EnvValues, error) {
 	return envValues, nil
 }
 
-// getExpectedKeys returns a list of all expected keys (JSON tags) in the Config struct.
+// getExpectedKeys returns a list of all expected environment variable keys.
+// It extracts these keys from the JSON tags in the Environment struct.
 func getExpectedKeys() []string {
 	var keys []string
 	val := reflect.TypeOf(Environment{})
@@ -93,7 +94,8 @@ func getExpectedKeys() []string {
 	return keys
 }
 
-// mapToStruct converts a map to a Config struct using JSON marshaling.
+// mapToStruct converts a map of environment variable key-value pairs
+// into an Environment struct using JSON marshaling and unmarshaling.
 func mapToStruct(m map[string]interface{}, s *Environment) error {
 	data, err := json.Marshal(m)
 	if err != nil {

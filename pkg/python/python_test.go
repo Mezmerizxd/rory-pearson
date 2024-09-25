@@ -1,74 +1,120 @@
 package python
 
 import (
+	"os"
+	"path/filepath"
 	"rory-pearson/pkg/log"
 	"testing"
 )
 
-func TestInitialize(t *testing.T) {
-	l := log.New(log.Config{
+func getLogger() log.Log {
+	return log.New(log.Config{
 		ID:            "python_test",
-		ConsoleOutput: true,
+		ConsoleOutput: false,
 		FileOutput:    false,
+		StoragePath:   "",
 	})
+}
 
-	_, err := Initialize(Config{
-		Log: l,
-		Librarys: []string{
-			"backgroundremover",
-		},
-	})
+func TestInitialize(t *testing.T) {
+	tempDir := t.TempDir() // Create a temporary directory for testing
+	logger := getLogger()
+
+	config := Config{
+		Log:         logger,
+		StoragePath: tempDir,
+		Librarys:    []string{"requests"}, // Example library to test installation
+	}
+
+	// Initialize Python instance
+	pythonInstance, err := Initialize(config)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	if !pythonInstance.IsInitialized {
+		t.Fatal("Expected Python instance to be initialized")
+	}
+
+	// Check if the virtual environment was created
+	venvPath := filepath.Join(tempDir, PythonVirtualEnvDirectory)
+	if _, err := os.Stat(venvPath); os.IsNotExist(err) {
+		t.Fatalf("Expected virtual environment directory %s to exist, but it does not", venvPath)
+	}
+}
+
+func TestGetInstance(t *testing.T) {
+	tempDir := t.TempDir() // Create a temporary directory for testing
+	logger := getLogger()
+
+	config := Config{
+		Log:         logger,
+		StoragePath: tempDir,
+		Librarys:    []string{"requests"},
+	}
+
+	// Initialize Python instance
+	_, err := Initialize(config)
+	if err != nil {
+		t.Fatalf("Expected no error during initialization, got: %v", err)
+	}
+
+	// Now retrieve the initialized instance
+	instance, err := GetInstance()
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	if !instance.IsInitialized {
+		t.Fatal("Expected Python instance to be initialized")
 	}
 }
 
 func TestDestroy(t *testing.T) {
-	l := log.New(log.Config{
-		ID:            "python_test",
-		ConsoleOutput: true,
-		FileOutput:    false,
-	})
+	tempDir := t.TempDir()
+	logger := getLogger()
 
-	py, err := Initialize(Config{
-		Log: l,
-		Librarys: []string{
-			"backgroundremover",
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
+	config := Config{
+		Log:         logger,
+		StoragePath: tempDir,
+		Librarys:    []string{"requests"},
 	}
 
-	py.Destroy()
+	// Initialize Python instance
+	pythonInstance, err := Initialize(config)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	// Destroy the Python instance
+	pythonInstance.Destroy()
+
+	// Check if the virtual environment has been removed
+	venvPath := filepath.Join(tempDir, PythonVirtualEnvDirectory)
+	if _, err := os.Stat(venvPath); !os.IsNotExist(err) {
+		t.Fatalf("Expected virtual environment directory %s to be removed, but it still exists", venvPath)
+	}
 }
 
-// go test -v -timeout 0 -run TestBackgroundRemover
-func TestBackgroundRemover(t *testing.T) {
-	l := log.New(log.Config{
-		ID:            "python_test",
-		ConsoleOutput: true,
-		FileOutput:    false,
-	})
+func TestLibraryInstallation(t *testing.T) {
+	tempDir := t.TempDir()
+	logger := getLogger()
 
-	py, err := Initialize(Config{
-		Log: l,
-		Librarys: []string{
-			"backgroundremover",
-		},
-	})
-	if err != nil {
-		t.Fatal(err)
+	config := Config{
+		Log:         logger,
+		StoragePath: tempDir,
+		Librarys:    []string{"requests"}, // Example library
 	}
 
-	t.Log("[TESTING] Background Initialized")
-
-	t.Log("[TESTING] Triggering backgroundremover")
-	cmd, err := py.Command("backgroundremover", "-i", "input.png", "-a", "-ae", "15", "-o", "output.png")
+	// Initialize Python instance
+	_, err := Initialize(config)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Expected no error during initialization, got: %v", err)
 	}
-	cmd.Run()
 
-	t.Log("[TESTING] Background Successfully Removed")
+	// Check if the library was installed
+	pythonInstance, _ := GetInstance()
+	if !pythonInstance.doesLibraryExist("requests") {
+		t.Fatal("Expected 'requests' library to be installed, but it is not")
+	}
 }
