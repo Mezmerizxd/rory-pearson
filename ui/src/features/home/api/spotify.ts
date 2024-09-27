@@ -139,3 +139,24 @@ export const useProfile = (config?: MutationConfig<typeof Profile>) => {
     mutationFn: Profile,
   });
 };
+
+// DISCONNECT #################################################
+
+export const Disconnect = async () => {
+  const login = GetLogin();
+  if (!login) return;
+
+  const response = await fetch(
+    `${getHostname()}/api/spotify/disconnect?state=${login.state}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error disconnecting from Spotify: ${response.statusText}`);
+  }
+
+  localStorage.removeItem("login"); // Remove cached login
+};

@@ -110,4 +110,23 @@ func Initialize(server *server.Server) {
 
 		c.JSON(200, gin.H{"message": "Session is valid"})
 	})
+
+	server.Engine.GET("/api/spotify/disconnect", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		sm.DestroySession(state)
+
+		c.JSON(200, gin.H{"message": "Session disconnected"})
+	})
 }

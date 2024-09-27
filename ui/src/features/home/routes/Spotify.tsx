@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Button } from "@components/Elements";
-import { useLogin, useProfile } from "../api/spotify";
+import { useLogin, useProfile, Disconnect } from "../api/spotify";
 import clsx from "clsx";
 
 const HomeLayout = React.lazy(() => import("@components/Layout/HomeLayout"));
@@ -26,12 +26,22 @@ export const Spotify = () => {
     }
   }
 
+  async function disconnect() {
+    localStorage.removeItem("login");
+    await Disconnect();
+
+    loginMut.reset();
+    profileMut.reset();
+  }
+
   // Connected state (profile data)
   return (
     <HomeLayout title="Spotify">
       {loginMut.data?.connected ? (
         <div className="p-10 space-y-5">
-          <p>Connected</p>
+          <p className="bg-green-500/20 text-green-500 border border-green-500/20">
+            Connected
+          </p>
 
           {profileMut.data?.user && (
             <div
@@ -42,14 +52,6 @@ export const Spotify = () => {
                 "p-4 bg-background-dark"
               )}
             >
-              <div id="user_image">
-                <img
-                  src={profileMut.data.user.images[0].url}
-                  alt={profileMut.data.user.display_name}
-                  className="rounded-full"
-                />
-              </div>
-
               <div
                 id="user_info"
                 className="flex flex-col justify-center items-start space-y-2"
@@ -76,25 +78,35 @@ export const Spotify = () => {
                   value={profileMut.data.user.birthdate}
                 />
               </div>
+
+              <div
+                id="user_data"
+                className="flex justify-center items-center space-y-2"
+              >
+                <Button variant="danger" onClick={disconnect}>
+                  Disconnect
+                </Button>
+              </div>
             </div>
           )}
 
           {profileMut.data?.playlists && (
-            <div className="p-4">
+            <div className="p-4 space-y-2">
               <h2 className="text-xl font-bold text-white">Playlists</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {profileMut.data.playlists.items.map((playlist) => {
-                  const images = playlist.images || []; // Fallback to an empty array if images is null
+                  const images = playlist.images || [];
                   return (
                     <div
                       key={playlist.id}
-                      className="flex flex-col justify-center items-start p-4 bg-background-dark rounded-lg transition-transform duration-200 hover:scale-105"
+                      className="flex flex-col justify-between items-start p-4 bg-background-dark rounded-lg transition-transform duration-200 hover:scale-105"
                     >
                       {images.length > 0 ? (
                         <img
                           src={images[0].url}
                           alt={playlist.name}
-                          className="w-full h-32 object-cover rounded-lg"
+                          height={images[0].height}
+                          className="w-full object-cover rounded-lg"
                         />
                       ) : (
                         <div className="w-full h-32 bg-gray-700 rounded-lg flex items-center justify-center text-gray-300">
@@ -104,12 +116,12 @@ export const Spotify = () => {
                       <h1 className="mt-2">
                         <a
                           href={playlist.external_urls.spotify}
-                          className="text-t-light hover:underline"
+                          className="text-t-light font-bold hover:underline"
                         >
                           {playlist.name || "Unnamed Playlist"}
                         </a>
                       </h1>
-                      <p className="mt-2 text-t-light">
+                      <p className="mt-2 text-t-light text-left">
                         {playlist.description || "No Description Available"}
                       </p>
                       <p className="mt-2 text-sm text-gray-400">
