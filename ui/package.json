@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "watch": "vite --host",
+    "watch": "vite build --watch",
+    "serve": "vite --host",
     "preview": "vite preview",
     "prettier": "prettier src/**/*.{ts,tsx} --write"
   },

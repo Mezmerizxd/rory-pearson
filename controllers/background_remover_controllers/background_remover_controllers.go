@@ -8,6 +8,8 @@ import (
 )
 
 func Initialize(server *server.Server) {
+	server.Cfg.Log.Info().Msg("Initializing background remover controllers")
+
 	server.Engine.POST("/api/background-remover", func(c *gin.Context) {
 		server.Cfg.Log.Info().Msg("Background remover request")
 

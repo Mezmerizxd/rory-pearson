@@ -6,7 +6,6 @@ import {
   navigation_items,
 } from "../../constants";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@components/Elements/Button";
 
 const Navigation = ({ onSelect }: { onSelect?: () => void }) => {
   const navigate = useNavigate();
@@ -85,7 +84,7 @@ const HomeHeader = () => {
       <nav className="bg-background-dark">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a
-            href="https://rory-pearson.com/"
+            href={window.location.origin}
             className="flex items-center space-x-3 rtl:space-x-reverse"
           >
             <img
