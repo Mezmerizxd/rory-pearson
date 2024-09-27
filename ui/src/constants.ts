@@ -18,10 +18,14 @@ export const navigation_items = [
     name: "Image To Icon",
     to: "/image-to-icon",
   },
-  // {
-  //   name: "Components",
-  //   to: "/components",
-  // },
+  {
+    name: "Spotify",
+    to: "/spotify",
+  },
+  {
+    name: "Components",
+    to: "/components",
+  },
 ].filter(Boolean) as {
   name: string;
   to: string;

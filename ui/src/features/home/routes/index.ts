@@ -4,3 +4,4 @@ export * from "./Components";
 export * from "./Board";
 export * from "./BackgroundRemover";
 export * from "./ImageToIcon";
+export * from "./Spotify";
