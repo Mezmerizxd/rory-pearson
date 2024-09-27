@@ -16,6 +16,7 @@ const { ImageToIcon } = lazyImport(
   () => import("../features/home"),
   "ImageToIcon"
 );
+const { Spotify } = lazyImport(() => import("../features/home"), "Spotify");
 
 export const AppRoutes = () => {
   const commonRoutes = [
@@ -35,6 +36,10 @@ export const AppRoutes = () => {
     {
       path: "/image-to-icon",
       element: <ImageToIcon />,
+    },
+    {
+      path: "/spotify",
+      element: <Spotify />,
     },
   ];
 

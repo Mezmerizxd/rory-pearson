@@ -13,6 +13,7 @@ import (
 // Environment holds the environment variables required by the application.
 // These are loaded from the .env file during initialization.
 type Environment struct {
+	ServerHost          string `json:"SERVER_HOST"`           // Host for the server to run on
 	ServerPort          string `json:"SERVER_PORT"`           // Port for the server to run on
 	UIBuildPath         string `json:"UI_BUILD_PATH"`         // Path to the UI build files
 	DbUrl               string `json:"DB_URL"`                // Database connection URL
