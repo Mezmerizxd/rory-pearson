@@ -12,7 +12,10 @@ function getHostname() {
 
 // Types for login and profile responses
 export type LoginResponse = { connected: boolean; url: string; state: string };
-export type ProfileResponse = { user: any; playlists: any };
+export type ProfileResponse = {
+  user: SpotifyUserData;
+  playlists: SpotifyPlaylistData;
+};
 
 // LOGIN #################################################
 
