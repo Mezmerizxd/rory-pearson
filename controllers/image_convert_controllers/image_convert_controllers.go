@@ -11,6 +11,8 @@ import (
 )
 
 func Initialize(server *server.Server) {
+	server.Cfg.Log.Info().Msg("Initializing image convert controllers")
+
 	server.Engine.POST("/api/image-convert/upload", func(c *gin.Context) {
 		// Get the uploaded file
 		formFile, err := c.FormFile("file")

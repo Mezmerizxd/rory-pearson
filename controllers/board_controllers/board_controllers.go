@@ -9,6 +9,8 @@ import (
 )
 
 func Initialize(server *server.Server) {
+	server.Cfg.Log.Info().Msg("Initializing board controllers")
+
 	server.Engine.GET("/api/board/get", func(c *gin.Context) {
 		// Get query parameters with default values
 		page, err := strconv.Atoi(c.DefaultQuery("page", "1")) // Default to page 1
