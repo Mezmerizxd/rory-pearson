@@ -9,15 +9,21 @@ import (
 // and that the Initialize function creates an Environment struct.
 func TestInitializeEnvironment(t *testing.T) {
 	// Set temporary environment variables for testing
+	os.Setenv("SERVER_HOST", "hostname")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("UI_BUILD_PATH", "/ui/build")
 	os.Setenv("DB_URL", "postgres://user:pass@localhost/db")
+	os.Setenv("SPOTIFY_CLIENT_ID", "client_id")
+	os.Setenv("SPOTIFY_CLIENT_SECRET", "client_secret")
 
 	// Ensure environment variables are cleaned up after the test
 	defer func() {
+		os.Unsetenv("SERVER_HOST")
 		os.Unsetenv("SERVER_PORT")
 		os.Unsetenv("UI_BUILD_PATH")
 		os.Unsetenv("DB_URL")
+		os.Unsetenv("SPOTIFY_CLIENT_ID")
+		os.Unsetenv("SPOTIFY_CLIENT_SECRET")
 	}()
 
 	// Initialize the environment
@@ -27,6 +33,9 @@ func TestInitializeEnvironment(t *testing.T) {
 	}
 
 	// Validate the environment values
+	if env.ServerHost != "hostname" {
+		t.Errorf("expected ServerHost 'hostname', got '%s'", env.ServerHost)
+	}
 	if env.ServerPort != "8080" {
 		t.Errorf("expected ServerPort '8080', got '%s'", env.ServerPort)
 	}
@@ -35,6 +44,12 @@ func TestInitializeEnvironment(t *testing.T) {
 	}
 	if env.DbUrl != "postgres://user:pass@localhost/db" {
 		t.Errorf("expected DbUrl 'postgres://user:pass@localhost/db', got '%s'", env.DbUrl)
+	}
+	if env.SpotifyClientId != "client_id" {
+		t.Errorf("expected SpotifyClientId 'client_id', got '%s'", env.SpotifyClientId)
+	}
+	if env.SpotifyClientSecret != "client_secret" {
+		t.Errorf("expected SpotifyClientSecret 'client_secret', got '%s'", env.SpotifyClientSecret)
 	}
 }
 
