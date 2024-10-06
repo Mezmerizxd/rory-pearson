@@ -2,6 +2,8 @@ import React from "react";
 import { useRoutes } from "react-router-dom";
 import { lazyImport } from "../util/lazyImport";
 
+import { Routes as SpotifyRoutes } from "../features/spotify";
+
 const { Landing } = lazyImport(() => import("../features/home"), "Landing");
 const { Components } = lazyImport(
   () => import("../features/home"),
@@ -16,7 +18,6 @@ const { ImageToIcon } = lazyImport(
   () => import("../features/home"),
   "ImageToIcon"
 );
-const { Spotify } = lazyImport(() => import("../features/home"), "Spotify");
 
 export const AppRoutes = () => {
   const commonRoutes = [
@@ -38,8 +39,7 @@ export const AppRoutes = () => {
       element: <ImageToIcon />,
     },
     {
-      path: "/spotify",
-      element: <Spotify />,
+      ...SpotifyRoutes,
     },
   ];
 

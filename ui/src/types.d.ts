@@ -54,28 +54,107 @@ type SpotifyUserData = {
   birthdate: string;
 };
 
+type SpotifyPlaylistItemData = {
+  collaborative: boolean;
+  description: string;
+  external_urls: {
+    spotify: string;
+  };
+  href: string;
+  id: string;
+  images: {
+    height: number;
+    width: number;
+    url: string;
+  }[];
+  name: string;
+  owner: SpotifyUserData;
+  public: boolean;
+  snapshotID: string;
+  tracks: {
+    href: string;
+    total: number;
+  };
+  uri: string;
+};
+
 type SpotifyPlaylistData = {
-  items: {
-    collaborative: boolean;
-    description: string;
+  href: string;
+  limit: number;
+  offset: number;
+  total: number;
+  next: string | null;
+  previous: string | null;
+  items: SpotifyPlaylistItemData[];
+};
+
+type SpotifyTrackData = {
+  artists: {
+    name: string;
+    id: string;
+    uri: string;
+    href: string;
     external_urls: {
       spotify: string;
     };
-    href: string;
+  }[];
+  available_markets: string[];
+  disc_number: number;
+  duration_ms: number;
+  explicit: boolean;
+  external_urls: {
+    spotify: string;
+  };
+  href: string;
+  id: string;
+  name: string;
+  preview_url: string | null;
+  track_number: number;
+  uri: string;
+  album: {
+    name: string;
     id: string;
+    uri: string;
+    href: string;
+    external_urls: {
+      spotify: string;
+    };
     images: {
       height: number;
       width: number;
       url: string;
     }[];
-    name: string;
-    owner: SpotifyUserData;
-    isPublic: boolean;
-    snapshotID: string;
-    tracks: {
-      href: string;
-      total: number;
+    release_date: string;
+  };
+};
+
+// type SpotifyPlaylistItemData = {
+//   href: string;
+//   limit: number;
+//   offset: number;
+//   total: number;
+//   next: string | null;
+//   previous: string | null;
+//   items: {
+//     added_at: string;
+//     added_by: SpotifyUserData;
+//     is_local: boolean;
+//     track: SpotifyTrackData;
+//     episode: any | null;
+//   }[];
+// };
+
+type SpotifyNowPlayingData = {
+  timestamp: number;
+  context: {
+    external_urls: {
+      spotify: string;
     };
+    href: string;
+    type: string;
     uri: string;
-  }[];
+  };
+  progress_ms: number;
+  is_playing: boolean;
+  item: SpotifyTrackData;
 };

@@ -3,50 +3,63 @@ import { MutationConfig } from "../../../util/react-query";
 import { useNotificationStore } from "../../../stores/notifications";
 
 // Helper function to determine the hostname
-function getHostname() {
-  if (window.location.hostname === "localhost") {
-    return "http://localhost:3000";
-  }
-  return window.location.origin;
-}
+const getHostname = (): string => {
+  return window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : window.location.origin;
+};
 
 // Types for login and profile responses
 export type LoginResponse = { connected: boolean; url: string; state: string };
 export type ProfileResponse = {
   user: SpotifyUserData;
-  playlists: SpotifyPlaylistData;
+  playlists: SpotifyPlaylistData[];
 };
 
-// LOGIN #################################################
-
-// Get cached login from localStorage
-export const GetLogin = (): LoginResponse | null => {
+// Utility: Get cached login from localStorage
+const getCachedLogin = (): LoginResponse | null => {
   const storedLogin = localStorage.getItem("login");
   return storedLogin ? JSON.parse(storedLogin) : null;
 };
 
-// Login mutation: Handles the login process with validation
-export const Login = async (): Promise<LoginResponse | null> => {
-  const cachedLogin = GetLogin();
-  if (cachedLogin) {
-    const validateResponse = await fetch(
+// Utility: Save login to localStorage
+const saveLogin = (login: LoginResponse) => {
+  localStorage.setItem("login", JSON.stringify(login));
+};
+
+// Utility: Remove cached login
+const removeCachedLogin = () => {
+  localStorage.removeItem("login");
+};
+
+// LOGIN #################################################
+
+// Validate cached login via server
+const validateLogin = async (cachedLogin: LoginResponse): Promise<boolean> => {
+  try {
+    const response = await fetch(
       `${getHostname()}/api/spotify/validate?state=${cachedLogin.state}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       }
     );
+    return response.ok;
+  } catch (error) {
+    console.error("Validation error: ", error);
+    return false;
+  }
+};
 
-    // If cached login is invalid, remove it and reset login
-    if (!validateResponse.ok) {
-      localStorage.removeItem("login");
-      return null;
+// Perform login flow
+export const login = async (): Promise<LoginResponse | null> => {
+  const cachedLogin = getCachedLogin();
+  if (cachedLogin) {
+    const isValid = await validateLogin(cachedLogin);
+    if (isValid) {
+      return { connected: true, ...cachedLogin };
     }
-
-    return {
-      connected: true,
-      ...cachedLogin,
-    }; // Return cached login if valid
+    removeCachedLogin();
   }
 
   const response = await fetch(`${getHostname()}/api/spotify/login`, {
@@ -59,23 +72,22 @@ export const Login = async (): Promise<LoginResponse | null> => {
   }
 
   const data: LoginResponse = await response.json();
-  localStorage.setItem("login", JSON.stringify(data)); // Cache login
-  return {
-    connected: false,
-    ...data,
-  };
+  saveLogin(data); // Cache login for later use
+  return { connected: false, ...data };
 };
 
 // React Query hook for login mutation
-export const useLogin = (config?: MutationConfig<typeof Login>) => {
+export const useLogin = (config?: MutationConfig<typeof login>) => {
   const { addNotification } = useNotificationStore();
 
   return useMutation({
+    mutationFn: login,
+    ...config,
     onError: (error: any) => {
       addNotification({
         type: "error",
         title: "Spotify",
-        message: "You must be logged in to connect to Spotify",
+        message: error?.message || "Unknown error",
       });
     },
     onSuccess: (data) => {
@@ -87,20 +99,18 @@ export const useLogin = (config?: MutationConfig<typeof Login>) => {
         });
       }
     },
-    ...config,
-    mutationFn: Login,
   });
 };
 
 // PROFILE #################################################
 
-// Profile fetching logic
-export const Profile = async (): Promise<ProfileResponse | null> => {
-  const login = GetLogin();
-  if (!login) return null; // Ensure login exists before fetching profile
+// Fetch profile using the cached login
+export const fetchProfile = async (): Promise<ProfileResponse | null> => {
+  const cachedLogin = getCachedLogin();
+  if (!cachedLogin) return null;
 
   const response = await fetch(
-    `${getHostname()}/api/spotify/profile?state=${login.state}`,
+    `${getHostname()}/api/spotify/profile?state=${cachedLogin.state}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -108,22 +118,24 @@ export const Profile = async (): Promise<ProfileResponse | null> => {
   );
 
   if (!response.ok) {
-    throw new Error(`Error getting Spotify profile: ${response.statusText}`);
+    throw new Error(`Error fetching Spotify profile: ${response.statusText}`);
   }
 
   return await response.json();
 };
 
-// React Query hook for profile mutation
-export const useProfile = (config?: MutationConfig<typeof Profile>) => {
+// React Query hook for profile fetching
+export const useProfile = (config?: MutationConfig<typeof fetchProfile>) => {
   const { addNotification } = useNotificationStore();
 
   return useMutation({
+    mutationFn: fetchProfile,
+    ...config,
     onError: (error: any) => {
       addNotification({
         type: "error",
         title: "Spotify",
-        message: error.message,
+        message: error?.message || "Failed to fetch profile",
       });
     },
     onSuccess: (data) => {
@@ -131,23 +143,72 @@ export const useProfile = (config?: MutationConfig<typeof Profile>) => {
         addNotification({
           type: "success",
           title: "Spotify",
-          message: "Successfully fetched Spotify profile",
+          message: "Spotify profile fetched successfully",
         });
       }
     },
+  });
+};
+
+// TRACKS #####################################################
+
+// Fetch tracks for a given playlist
+export const fetchTracks = async (
+  playlistId: string
+): Promise<SpotifyPlaylistItemData[]> => {
+  const cachedLogin = getCachedLogin();
+  if (!cachedLogin) return [];
+
+  const response = await fetch(
+    `${getHostname()}/api/spotify/tracks?state=${cachedLogin.state}&playlistId=${playlistId}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Error fetching Spotify tracks: ${response.statusText}`);
+  }
+
+  return await response.json();
+};
+
+// React Query hook for fetching tracks
+export const useTracks = (config?: MutationConfig<typeof fetchTracks>) => {
+  const { addNotification } = useNotificationStore();
+
+  return useMutation({
+    mutationFn: fetchTracks,
     ...config,
-    mutationFn: Profile,
+    onError: (error: any) => {
+      addNotification({
+        type: "error",
+        title: "Spotify",
+        message: error?.message || "Failed to fetch tracks",
+      });
+    },
+    onSuccess: (data) => {
+      if (data) {
+        addNotification({
+          type: "success",
+          title: "Spotify",
+          message: "Tracks fetched successfully",
+        });
+      }
+    },
   });
 };
 
 // DISCONNECT #################################################
 
-export const Disconnect = async () => {
-  const login = GetLogin();
-  if (!login) return;
+// Disconnect from Spotify and clear local cache
+export const disconnect = async (): Promise<void> => {
+  const cachedLogin = getCachedLogin();
+  if (!cachedLogin) return;
 
   const response = await fetch(
-    `${getHostname()}/api/spotify/disconnect?state=${login.state}`,
+    `${getHostname()}/api/spotify/disconnect?state=${cachedLogin.state}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -158,5 +219,5 @@ export const Disconnect = async () => {
     throw new Error(`Error disconnecting from Spotify: ${response.statusText}`);
   }
 
-  localStorage.removeItem("login"); // Remove cached login
+  removeCachedLogin();
 };
