@@ -7,6 +7,7 @@ import (
 	"rory-pearson/pkg/util"
 
 	"github.com/gin-gonic/gin"
+	zSpotify "github.com/zmb3/spotify/v2"
 )
 
 func Initialize(server *server.Server) {
@@ -29,6 +30,49 @@ func Initialize(server *server.Server) {
 		sm.StoreSession(c.Request.Context(), state, nil) // Initial store for state, token will be added later
 
 		c.JSON(http.StatusOK, gin.H{"url": url, "state": state})
+	})
+
+	server.Engine.GET("/api/spotify/validate", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		// Retrieve the current user profile
+		_, err := session.Client.CurrentUser(c.Request.Context())
+		if err != nil {
+			c.JSON(403, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, gin.H{"message": "Session is valid"})
+	})
+
+	server.Engine.GET("/api/spotify/disconnect", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		sm.DestroySession(state)
+
+		c.JSON(200, gin.H{"message": "Session disconnected"})
 	})
 
 	server.Engine.GET("/api/spotify/callback", func(c *gin.Context) {
@@ -78,16 +122,63 @@ func Initialize(server *server.Server) {
 			return
 		}
 
-		playlists, err := session.Client.GetPlaylistsForUser(c.Request.Context(), user.ID)
+		c.JSON(200, user)
+	})
+
+	server.Engine.GET("/api/spotify/playlists", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		// Retrieve the current user playlists
+		playlists, err := session.Client.CurrentUsersPlaylists(c.Request.Context())
 		if err != nil {
 			c.JSON(403, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(200, gin.H{"user": user, "playlists": playlists})
+		c.JSON(200, playlists)
 	})
 
-	server.Engine.GET("/api/spotify/validate", func(c *gin.Context) {
+	server.Engine.GET("/api/spotify/tracks", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+		playlistId := c.Query("playlistId")
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		if playlistId == "" {
+			c.JSON(403, gin.H{"error": "Playlist ID is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		tracks, err := session.Client.GetPlaylistItems(c.Request.Context(), zSpotify.ID(playlistId))
+		if err != nil {
+			c.JSON(403, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, tracks)
+	})
+
+	server.Engine.GET("/api/spotify/now-playing", func(c *gin.Context) {
 		state := c.Query("state") // Use the state parameter to identify the session
 
 		if state == "" {
@@ -102,31 +193,12 @@ func Initialize(server *server.Server) {
 		}
 
 		// Retrieve the current user profile
-		_, err := session.Client.CurrentUser(c.Request.Context())
+		np, err := session.Client.PlayerCurrentlyPlaying(c.Request.Context())
 		if err != nil {
 			c.JSON(403, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(200, gin.H{"message": "Session is valid"})
-	})
-
-	server.Engine.GET("/api/spotify/disconnect", func(c *gin.Context) {
-		state := c.Query("state") // Use the state parameter to identify the session
-
-		if state == "" {
-			c.JSON(403, gin.H{"error": "State is required"})
-			return
-		}
-
-		session := sm.GetSession(state)
-		if session == nil {
-			c.JSON(403, gin.H{"error": "Session not found"})
-			return
-		}
-
-		sm.DestroySession(state)
-
-		c.JSON(200, gin.H{"message": "Session disconnected"})
+		c.JSON(200, np)
 	})
 }
