@@ -2,7 +2,7 @@ package spotify
 
 import (
 	"net/http"
-	"rory-pearson/internal/spotify_manager"
+	"rory-pearson/internal/spotify"
 	"rory-pearson/pkg/server"
 	"rory-pearson/pkg/util"
 
@@ -12,7 +12,7 @@ import (
 func AuthRoutes(server *server.Server) {
 	server.Cfg.Log.Info().Msg("Initializing Spotify controllers")
 
-	sm := spotify_manager.GetInstance()
+	sm := spotify.GetInstance()
 	if sm == nil {
 		server.Cfg.Log.Error().Msg("Spotify manager not initialized")
 		return
