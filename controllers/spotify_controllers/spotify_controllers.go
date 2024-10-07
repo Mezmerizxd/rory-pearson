@@ -3,6 +3,7 @@ package spotify_controllers
 import (
 	"net/http"
 	"rory-pearson/internal/spotify_manager"
+	"rory-pearson/internal/youtube"
 	"rory-pearson/pkg/server"
 	"rory-pearson/pkg/util"
 
@@ -14,10 +15,7 @@ func Initialize(server *server.Server) {
 	server.Cfg.Log.Info().Msg("Initializing Spotify controllers")
 
 	sm := spotify_manager.GetInstance()
-	if sm == nil {
-		server.Cfg.Log.Error().Msg("Spotify manager not initialized")
-		return
-	}
+	yt := youtube.GetInstance()
 
 	server.Engine.GET("/api/spotify/login", func(c *gin.Context) {
 		// Generate a new UUID for the state
@@ -200,5 +198,49 @@ func Initialize(server *server.Server) {
 		}
 
 		c.JSON(200, np)
+	})
+
+	type PlaylistToYoutubeRequest struct {
+		PlaylistId string `json:"playlistId"`
+	}
+	server.Engine.POST("/api/spotify/playlist-to-youtube", func(c *gin.Context) {
+		state := c.Query("state") // Use the state parameter to identify the session
+
+		var req PlaylistToYoutubeRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(403, gin.H{"error": err.Error()})
+			return
+		}
+
+		if state == "" {
+			c.JSON(403, gin.H{"error": "State is required"})
+			return
+		}
+
+		if req.PlaylistId == "" {
+			c.JSON(403, gin.H{"error": "Playlist ID is required"})
+			return
+		}
+
+		session := sm.GetSession(state)
+		if session == nil {
+			c.JSON(403, gin.H{"error": "Session not found"})
+			return
+		}
+
+		playlistNames, err := sm.GetNamesFromPlaylistTracks(*session, req.PlaylistId)
+		if err != nil {
+			c.JSON(403, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Convert the playlist to a YouTube playlist
+		youtubeData, err := yt.BulkSearchWithHighestViews(playlistNames)
+		if err != nil {
+			c.JSON(403, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, gin.H{"youtubeData": youtubeData})
 	})
 }

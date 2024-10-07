@@ -41,22 +41,16 @@ var instance *SpotifyManager
 
 // Initialize sets up a singleton SpotifyManager instance.
 // It initializes the environment, sets up Spotify authentication, and prepares session management.
-func Initialize(c Config) *SpotifyManager {
+func Initialize(c Config) (*SpotifyManager, error) {
 	if instance != nil {
-		return instance
-	}
-
-	env, err := environment.Initialize()
-	if err != nil {
-		c.Log.Error().Err(err).Msg("failed to initialize environment")
-		return nil
+		return instance, nil
 	}
 
 	// Create a context with cancellation for managing session cleanup and other tasks.
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Generate the Spotify redirect URL using the server host environment variable.
-	redirectUrl := fmt.Sprintf("%s/api/spotify/callback", env.ServerHost)
+	redirectUrl := fmt.Sprintf("%s/api/spotify/callback", environment.Get().ServerHost)
 
 	// Create and configure the SpotifyManager with authentication and session management.
 	authentication := &SpotifyManager{
@@ -71,8 +65,8 @@ func Initialize(c Config) *SpotifyManager {
 				spotifyauth.ScopePlaylistReadPrivate,
 				spotifyauth.ScopeUserReadCurrentlyPlaying,
 			),
-			spotifyauth.WithClientID(env.SpotifyClientId),         // Replace with actual Client ID
-			spotifyauth.WithClientSecret(env.SpotifyClientSecret), // Replace with actual Client Secret
+			spotifyauth.WithClientID(environment.Get().SpotifyClientId),         // Replace with actual Client ID
+			spotifyauth.WithClientSecret(environment.Get().SpotifyClientSecret), // Replace with actual Client Secret
 		),
 		Sessions: make(map[string]*Session),
 	}
@@ -80,7 +74,7 @@ func Initialize(c Config) *SpotifyManager {
 	authentication.Log.Info().Msg("SpotifyManager initialized")
 
 	instance = authentication
-	return instance
+	return instance, nil
 }
 
 // GetInstance returns the singleton instance of SpotifyManager. It panics if the manager has not been initialized.

@@ -73,7 +73,7 @@ export const PlaylistThumbnail: React.FC<PlaylistThumbnailProps> = ({
             <div className="relative" ref={optionsRef}>
               <IconButton size="xs" icon={<MdEdit />} onClick={handleOptions} />
               {showOptions && (
-                <div className="absolute top-full right-0 p-1 bg-background border border-background-light rounded shadow-lg z-10 w-36">
+                <div className="absolute top-full right-0 p-1 bg-background border border-background-light rounded shadow-lg z-10 w-fit">
                   {options.map((option, index) => (
                     <div
                       key={index}

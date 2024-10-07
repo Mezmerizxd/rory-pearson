@@ -9,6 +9,8 @@ import { queryClient } from "../util/react-query";
 import { Spinner } from "@components/Elements";
 import { Button } from "@components/Elements/Button";
 import { Notifications } from "@components/Notifications";
+import { useNotificationStore } from "../stores/notifications";
+import { GetHost } from "../util/host";
 
 const ErrorFallback = () => {
   return (
@@ -34,6 +36,37 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
+  const notifications = useNotificationStore();
+
+  React.useEffect(() => {
+    setTimeout(async () => {
+      let errorMsg = null;
+
+      try {
+        const response = await fetch(`${GetHost()}/api/ping`);
+
+        const data = await response.json();
+        if (!data) {
+          errorMsg = "Failed to connect to the server";
+        }
+        if (data.error) {
+          errorMsg = data.error;
+        }
+      } catch (error) {
+        errorMsg = `Failed to send request to the server, ${error}`;
+      }
+
+      // if there is an error, show it
+      if (errorMsg) {
+        notifications.addNotification({
+          type: "error",
+          title: "Server Error",
+          message: errorMsg || "Failed to connect to the server",
+        });
+      }
+    }, 5000);
+  }, []);
+
   return (
     <React.Suspense
       fallback={

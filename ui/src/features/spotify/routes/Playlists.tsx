@@ -2,13 +2,20 @@ import React, { useEffect, useState } from "react";
 import { ContentLayout } from "../../../components/Layout";
 import { Button, Spinner } from "@components/Elements";
 
-import { useAuth, openSpotifyLogin, usePlaylists, usePlayer } from "../api";
+import {
+  useAuth,
+  openSpotifyLogin,
+  usePlaylists,
+  usePlayer,
+  usePlaylistToYoutube,
+} from "../api";
 import { PlaylistThumbnail } from "../components";
 import clsx from "clsx";
 
 export const Playlists = () => {
   const auth = useAuth();
   const playlists = usePlaylists();
+  const playlistToYoutube = usePlaylistToYoutube();
 
   useEffect(() => {
     connect();
@@ -48,6 +55,15 @@ export const Playlists = () => {
                   name: "View Playlist",
                   func: () => {
                     window.open(item.external_urls.spotify, "_blank");
+                  },
+                },
+                {
+                  name: "Convert to YouTube",
+                  func: async () => {
+                    await playlistToYoutube.mutateAsync({
+                      auth: auth.data,
+                      playlistId: item.id,
+                    });
                   },
                 },
               ]}

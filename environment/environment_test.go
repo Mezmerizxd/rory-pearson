@@ -27,7 +27,7 @@ func TestInitializeEnvironment(t *testing.T) {
 	}()
 
 	// Initialize the environment
-	env, err := Initialize()
+	env, err := Initialize(nil)
 	if err != nil {
 		t.Fatalf("failed to initialize environment: %v", err)
 	}

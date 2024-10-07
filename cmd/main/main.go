@@ -6,6 +6,7 @@ import (
 	"rory-pearson/internal/background_remover"
 	"rory-pearson/internal/board"
 	"rory-pearson/internal/spotify_manager"
+	"rory-pearson/internal/youtube"
 	"rory-pearson/pkg/log"
 	"rory-pearson/pkg/python"
 	"rory-pearson/pkg/server"
@@ -29,7 +30,7 @@ func main() {
 	// 2. Environment Initialization
 	// ========================================
 	// Load environment variables and configuration settings.
-	env, err := environment.Initialize()
+	env, err := environment.Initialize(nil)
 	if err != nil {
 		// If environment initialization fails, log the error and stop execution.
 		l.Error().Err(err).Msgf("Failed to initialize environment: %s", err.Error())
@@ -93,13 +94,29 @@ func main() {
 	// 6. Spotify Manager Initialization
 	// ========================================
 	// Initialize Spotify Manager to handle session management.
-	sm := spotify_manager.Initialize(spotify_manager.Config{
+	sm, err := spotify_manager.Initialize(spotify_manager.Config{
 		Log: l, // Use logger.
 	})
+	if err != nil {
+		// Log any errors during Spotify Manager initialization and stop execution.
+		l.Error().Err(err).Msg("Failed to initialize Spotify Manager")
+		return
+	}
 	defer sm.Close() // Ensure Spotify Manager cleans up resources on shutdown.
 
 	// ========================================
-	// 7. Server Initialization
+	// 7. Youtube Initialization
+	// ========================================
+	// Initialize the Youtube service with the Youtube API key from the environment.
+	_, err = youtube.Initialize(youtube.Config{})
+	if err != nil {
+		// Log any errors during Youtube initialization and stop execution.
+		l.Error().Err(err).Msg("Failed to initialize Youtube")
+		return
+	}
+
+	// ========================================
+	// 8. Server Initialization
 	// ========================================
 	// Set up logging for Server-related operations.
 	srvLog := log.New(log.Config{
@@ -122,19 +139,19 @@ func main() {
 	}
 
 	// ========================================
-	// 8. Controllers Setup
+	// 9. Controllers Setup
 	// ========================================
 	// Initialize application controllers to handle routing and API logic.
 	controllers.Initialize(svr)
 
 	// ========================================
-	// 9. Serve Static UI Files
+	// 10. Serve Static UI Files
 	// ========================================
 	// Set up the server to serve the UI build directory, defined in the environment.
 	svr.ServeUI(env.UIBuildPath)
 
 	// ========================================
-	// 10. Start Server
+	// 11. Start Server
 	// ========================================
 	// Start the server and listen for incoming requests.
 	// If the server fails to start, log the error.

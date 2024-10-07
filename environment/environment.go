@@ -10,6 +10,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type Config struct {
+	Filepath string
+}
+
 // Environment holds the environment variables required by the application.
 // These are loaded from the .env file during initialization.
 type Environment struct {
@@ -19,17 +23,25 @@ type Environment struct {
 	DbUrl               string `json:"DB_URL"`                // Database connection URL
 	SpotifyClientId     string `json:"SPOTIFY_CLIENT_ID"`     // Spotify client ID
 	SpotifyClientSecret string `json:"SPOTIFY_CLIENT_SECRET"` // Spotify client secret
+	YoutubeApiKey       string `json:"YOUTUBE_API_KEY"`       // YouTube API key
 }
 
 // Initialize loads the environment variables from the .env file and
 // returns a populated Environment struct.
-func Initialize() (*Environment, error) {
+func Initialize(c *Config) (*Environment, error) {
 	environment := Environment{}
 
 	// Load environment variables from .env file
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Errorf("error loading .env file")
+	if c != nil {
+		err := godotenv.Load(c.Filepath)
+		if err != nil {
+			return nil, fmt.Errorf("error loading .env file: %v", err)
+		}
+	} else {
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Errorf("error loading .env file")
+		}
 	}
 
 	// Retrieve the expected environment keys (JSON tags from Environment struct)

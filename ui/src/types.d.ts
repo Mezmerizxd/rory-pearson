@@ -158,3 +158,11 @@ type SpotifyNowPlayingData = {
   is_playing: boolean;
   item: SpotifyTrackData;
 };
+
+type YoutubeVideoData = {
+  id: string;
+  title: string;
+  channel: string;
+  views: number;
+  url: string;
+};
