@@ -1,4 +1,4 @@
-package spotify_controllers
+package spotify
 
 import (
 	"net/http"
@@ -12,6 +12,8 @@ import (
 
 func Initialize(server *server.Server) {
 	server.Cfg.Log.Info().Msg("Initializing Spotify controllers")
+
+	AuthRoutes(server)
 
 	sm := spotify_manager.GetInstance()
 	if sm == nil {
