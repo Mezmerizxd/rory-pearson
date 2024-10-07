@@ -6,10 +6,13 @@ import (
 	"rory-pearson/internal/background_remover"
 	"rory-pearson/internal/board"
 	"rory-pearson/internal/spotify_manager"
+	"rory-pearson/internal/users"
 	"rory-pearson/internal/youtube"
+	"rory-pearson/pkg/features"
 	"rory-pearson/pkg/log"
 	"rory-pearson/pkg/python"
 	"rory-pearson/pkg/server"
+	"rory-pearson/plugins"
 )
 
 func main() {
@@ -116,7 +119,46 @@ func main() {
 	}
 
 	// ========================================
-	// 8. Server Initialization
+	// 9. Features Initialization
+	// ========================================
+	// Initialize all features.
+	featureLog := log.New(log.Config{
+		ID:            "features",
+		ConsoleOutput: true,
+		FileOutput:    true,
+		StoragePath:   environment.RootDirectory,
+	})
+	defer featureLog.Close() // Ensure the logger is closed properly when the function ends.
+
+	f := features.Initialize(features.Config{
+		Log: featureLog, // Pass the main logger to the features.
+	})
+
+	// Register all features with the feature manager.
+	f.RegisterFeature(users.UsersFeatureType, &users.UsersFeature{})
+
+	// Initialize all features.
+	err = f.InitializeAll()
+	if err != nil {
+		// Log any errors during feature initialization and stop execution.
+		l.Error().Err(err).Msg("Failed to initialize features")
+		return
+	}
+
+	// ========================================
+	// 10. Plugins Initialization
+	// ========================================
+	// Initialize all plugins.
+	p, err := plugins.Initialize()
+	if err != nil {
+		// Log any errors during plugin initialization and stop execution.
+		l.Error().Err(err).Msg("Failed to initialize plugins")
+		return
+	}
+	defer p.Close() // Ensure plugins are closed properly when the function ends.
+
+	// ========================================
+	// 11. Server Initialization
 	// ========================================
 	// Set up logging for Server-related operations.
 	srvLog := log.New(log.Config{
@@ -139,19 +181,19 @@ func main() {
 	}
 
 	// ========================================
-	// 9. Controllers Setup
+	// 12. Controllers Setup
 	// ========================================
 	// Initialize application controllers to handle routing and API logic.
 	controllers.Initialize(svr)
 
 	// ========================================
-	// 10. Serve Static UI Files
+	// 13. Serve Static UI Files
 	// ========================================
 	// Set up the server to serve the UI build directory, defined in the environment.
 	svr.ServeUI(env.UIBuildPath)
 
 	// ========================================
-	// 11. Start Server
+	// 14. Start Server
 	// ========================================
 	// Start the server and listen for incoming requests.
 	// If the server fails to start, log the error.

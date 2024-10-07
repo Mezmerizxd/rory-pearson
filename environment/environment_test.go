@@ -15,6 +15,7 @@ func TestInitializeEnvironment(t *testing.T) {
 	os.Setenv("DB_URL", "postgres://user:pass@localhost/db")
 	os.Setenv("SPOTIFY_CLIENT_ID", "client_id")
 	os.Setenv("SPOTIFY_CLIENT_SECRET", "client_secret")
+	os.Setenv("YOUTUBE_API_KEY", "api")
 
 	// Ensure environment variables are cleaned up after the test
 	defer func() {
@@ -24,6 +25,7 @@ func TestInitializeEnvironment(t *testing.T) {
 		os.Unsetenv("DB_URL")
 		os.Unsetenv("SPOTIFY_CLIENT_ID")
 		os.Unsetenv("SPOTIFY_CLIENT_SECRET")
+		os.Unsetenv("YOUTUBE_API_KEY")
 	}()
 
 	// Initialize the environment
@@ -50,6 +52,9 @@ func TestInitializeEnvironment(t *testing.T) {
 	}
 	if env.SpotifyClientSecret != "client_secret" {
 		t.Errorf("expected SpotifyClientSecret 'client_secret', got '%s'", env.SpotifyClientSecret)
+	}
+	if env.YoutubeApiKey != "api" {
+		t.Errorf("expected YoutubeApiKey 'api', got '%s'", env.YoutubeApiKey)
 	}
 }
 
