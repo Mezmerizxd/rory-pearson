@@ -1,4 +1,4 @@
-package spotify_manager
+package spotify
 
 import (
 	zSpotify "github.com/zmb3/spotify/v2"

@@ -1,4 +1,4 @@
-package board_controllers
+package board
 
 import (
 	"rory-pearson/internal/board"

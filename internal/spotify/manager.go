@@ -1,4 +1,4 @@
-package spotify_manager
+package spotify
 
 import (
 	"context"

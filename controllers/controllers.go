@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"rory-pearson/controllers/background_remover_controllers"
-	"rory-pearson/controllers/board_controllers"
-	"rory-pearson/controllers/image_convert_controllers"
-	"rory-pearson/controllers/spotify_controllers"
+	"rory-pearson/controllers/background_remover"
+	"rory-pearson/controllers/board"
+	"rory-pearson/controllers/image_convert"
+	"rory-pearson/controllers/spotify"
 	"rory-pearson/pkg/server"
 	"rory-pearson/pkg/util"
 
@@ -12,10 +12,10 @@ import (
 )
 
 func Initialize(server *server.Server) {
-	board_controllers.Initialize(server)
-	image_convert_controllers.Initialize(server)
-	background_remover_controllers.Initialize(server)
-	spotify_controllers.Initialize(server)
+	board.Initialize(server)
+	image_convert.Initialize(server)
+	background_remover.Initialize(server)
+	spotify.Initialize(server)
 
 	server.Engine.GET("/api/ping", func(c *gin.Context) {
 		info, err := util.GetSystemInfo()

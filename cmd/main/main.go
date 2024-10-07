@@ -5,7 +5,7 @@ import (
 	"rory-pearson/environment"
 	"rory-pearson/internal/background_remover"
 	"rory-pearson/internal/board"
-	"rory-pearson/internal/spotify_manager"
+	"rory-pearson/internal/spotify"
 	"rory-pearson/pkg/log"
 	"rory-pearson/pkg/python"
 	"rory-pearson/pkg/server"
@@ -93,7 +93,7 @@ func main() {
 	// 6. Spotify Manager Initialization
 	// ========================================
 	// Initialize Spotify Manager to handle session management.
-	sm := spotify_manager.Initialize(spotify_manager.Config{
+	sm := spotify.Initialize(spotify.Config{
 		Log: l, // Use logger.
 	})
 	defer sm.Close() // Ensure Spotify Manager cleans up resources on shutdown.

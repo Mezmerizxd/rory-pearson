@@ -1,4 +1,4 @@
-package image_convert_controllers
+package image_convert
 
 import (
 	"os"

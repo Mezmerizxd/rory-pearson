@@ -1,4 +1,4 @@
-package background_remover_controllers
+package background_remover
 
 import (
 	"rory-pearson/internal/background_remover"
