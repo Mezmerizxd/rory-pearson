@@ -21,3 +21,4 @@ ui/node_modules/**/*
 venv/
 temp/
 storage/
+tmp/

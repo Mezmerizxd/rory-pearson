@@ -167,14 +167,13 @@ func initServer(mainLogger log.Log) {
 	// Controllers
 	controllers.Initialize(svr)
 
-	// Setup UI
+	// Setup ui
 	svr.ServeUI(environment.Get().UIBuildPath)
 
-	// Start the server in a new goroutine to avoid blocking the main thread
-	go func() {
-		err = svr.Start()
-		if err != nil {
-			mainLogger.Error().Err(err).Msg("Failed to start server")
-		}
-	}()
+	// Start the server
+	err = svr.Start()
+	if err != nil {
+		mainLogger.Error().Err(err).Msg("Failed to start server")
+		return
+	}
 }

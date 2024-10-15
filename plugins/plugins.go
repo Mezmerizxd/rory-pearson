@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"rory-pearson/pkg/log"
-	"rory-pearson/plugins/commands"
 )
 
 type Config struct {
@@ -12,7 +11,7 @@ type Config struct {
 type Plugins struct {
 	log log.Log
 
-	Commands commands.CommandsPlugin
+	Commands CommandsPlugin
 }
 
 var instance *Plugins
@@ -23,12 +22,15 @@ func Initialize(c Config) (*Plugins, error) {
 	}
 
 	instance = &Plugins{
-		log:      c.Log,
-		Commands: commands.CommandsPlugin{},
+		log: c.Log,
+		Commands: CommandsPlugin{
+			Log:      c.Log,
+			Commands: make(map[string]Command),
+		},
 	}
 
 	// Initialize plugins here
-	_, err := instance.Commands.Initialize(commands.CommandsPluginConfig{})
+	_, err := instance.Commands.Initialize()
 	if err != nil {
 		return nil, err
 	}
@@ -43,9 +45,9 @@ func (p *Plugins) Close() {
 	p.log.Info().Msg("stopping plugins")
 }
 
-func GetInstance() Plugins {
+func GetInstance() *Plugins {
 	if instance == nil {
 		panic("plugins not initialized")
 	}
-	return *instance
+	return instance
 }

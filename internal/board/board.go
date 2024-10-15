@@ -3,6 +3,7 @@ package board
 import (
 	"fmt"
 	"rory-pearson/pkg/log"
+	"rory-pearson/plugins"
 	"sort"
 	"time"
 )
@@ -43,11 +44,32 @@ func Initialize(cfg Config) error {
 	// Assign board to the global instance
 	instance = board
 
-	// Optionally generate random posts for testing purposes (commented out here)
-	// GenerateRandomPosts(100)
-
 	// Log successful initialization
 	instance.Log.Info().Msg("Board initialized")
+
+	plugins.GetInstance().Commands.RegisterCommand(plugins.Command{
+		ID:          "create_post",
+		Name:        "Create Posts",
+		Description: "Create a new post with a title, content, and author",
+		ArgTypes:    []string{"string", "string", "string"}, // Specify argument types
+		Function: func(args ...any) error {
+			title := args[0].(string)
+			content := args[1].(string)
+			author := args[2].(string)
+
+			err := CreatePost(CreateBoardPost{
+				Title:   title,
+				Content: content,
+				Author:  author,
+			})
+
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	})
 
 	return nil
 }

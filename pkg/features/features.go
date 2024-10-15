@@ -25,6 +25,7 @@ var instance *Features
 // Initialize initializes the Features instance.
 func Initialize(cfg Config) *Features {
 	feature := &Features{
+		log:             cfg.Log,
 		FeatureRegistry: make(map[FeatureType]interface{}), // Ensure the registry is initialized
 	}
 

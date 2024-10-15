@@ -10,8 +10,6 @@ import (
 )
 
 func AuthRoutes(server *server.Server) {
-	server.Cfg.Log.Info().Msg("Initializing Spotify controllers")
-
 	sm := spotify.GetInstance()
 	if sm == nil {
 		server.Cfg.Log.Error().Msg("Spotify manager not initialized")
